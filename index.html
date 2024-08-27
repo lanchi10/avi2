@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון תשלום מע"מ בלבד</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            color: #2c3e50;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #3498db;
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #2980b9;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #c0392b;
+        }
+        #result {
+            margin-top: 20px;
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .result-item {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #e67e22;
+        }
+        .total {
+            font-size: 22px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        .info-button, .advanced-button, .clear-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .info-button:hover, .advanced-button:hover, .clear-button:hover {
+            background-color: #2980b9;
+        }
+        .advanced-button + .warning {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #e74c3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .warning img {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>מחשבון תשלום מע"מ בלבד</h1>
+        
+        <label for="propertyValue">ערך הנכס והמבנה (בש"ח):</label>
+        <input type="number" id="propertyValue" placeholder="הכנס את ערך הנכס והמבנה" oninput="clearResult()">
+        
+        <p style="color: #2980b9; font-weight: bold;">נכס זה כולל זכויות בנייה של 160 מ"ר כפי שרשום באמי</p>
+        
+        <button onclick="calculate()">חשב מע"מ ותשלום דחוי</button>
+        <button class="clear-button" onclick="clearFields()">נקה שדות</button>
+        
+        <div id="result"></div>
+
+        <button class="info-button" onclick="toggleInfo()">לחץ כאן להסבר איך הגענו לחישוב</button>
+        <div id="info" class="hidden">
+            <h2>איך הגענו לחישוב?</h2>
+            <p>התשלום לרמ"י עבור 160 מ"ר נגזר מ-29.25% מערך הנכס. על סכום זה מתווסף מע"מ בגובה 17%. תשלום המע"מ ישולם מיד, והשאר ידחה.</p>
+            <p>לדוגמה, עבור נכס בשווי 1,000,000 ש"ח:</p>
+            <ul>
+                <li>תשלום לרמ"י: 292,500 ש"ח</li>
+                <li>מע"מ לתשלום מידי: 49,725 ש"ח</li>
+                <li>תשלום דחוי: 292,500 ש"ח</li>
+            </ul>
+        </div>
+
+        <button class="advanced-button" onclick="openAdvancedCalculator()">לחץ כאן לגרסת המחשבון המלאה</button>
+        <div class="warning">
+            <img src="https://img.icons8.com/emoji/48/000000/warning-emoji.png" alt="warning">
+            למתקשים בהבנה מומלץ לא ללחוץ על כפתור זה
+        </div>
+    </div>
+
+    <script>
+        function formatNumber(num) {
+            return new Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' }).format(num);
+        }
+
+        function calculate() {
+            const propertyValue = parseFloat(document.getElementById('propertyValue').value) || 0;
+            const baseRate = 0.2925;  // שיעור מס רמ"י עבור 160 מ"ר
+            const vatRate = 0.17;     // מע"מ 17%
+
+            const paymentToRMI = propertyValue * baseRate;
+            const vatAmount = paymentToRMI * vatRate;
+            const deferredAmount = paymentToRMI;
+
+            let resultHTML = `
+                <div class="result-item">תשלום מע"מ שיש לשלם מיד: <span class="highlight">${formatNumber(vatAmount)}</span></div>
+                <div class="result-item">סכום דחוי לתשלום בעתיד: <span class="highlight">${formatNumber(deferredAmount)}</span></div>
+                <div class="total">סה"כ תשלום דחוי + מע"מ: ${formatNumber(deferredAmount + vatAmount)}</div>
+            `;
+
+            document.getElementById('result').innerHTML = resultHTML;
+        }
+
+        function clearResult() {
+            document.getElementById('result').innerHTML = '';
+        }
+
+        function clearFields() {
+            document.getElementById('propertyValue').value = '';
+            clearResult();
+        }
+
+        function toggleInfo() {
+            const infoDiv = document.getElementById('info');
+            if (infoDiv.classList.contains('hidden')) {
+                infoDiv.classList.remove('hidden');
+            } else {
+                infoDiv.classList.add('hidden');
+            }
+        }
+
+        function openAdvancedCalculator() {
+            window.location.href = 'https://lanchi10.github.io/avi/';
+        }
+    </script>
+</body>
+</html>
